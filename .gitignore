@@ -1,6 +1,7 @@
 #Custom
 config.json
 *.sqlite
+startup.sh
 
 # Logs
 logs
