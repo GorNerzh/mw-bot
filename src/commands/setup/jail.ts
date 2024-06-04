@@ -47,9 +47,7 @@ module.exports = {
         data.jailRoleId = interaction.options.getRole('jail-role').id
         data.roleToRemoveId = interaction.options.getRole('role-to-remove').id
         const logChannel = interaction.options.getChannel('log-channel')
-        if (logChannel) {
-            data.logChannelId = logChannel.id
-        }
+        data.logChannelId = logChannel?.id
         await data.saveAsync()
 
         await interaction.reply({

@@ -81,16 +81,17 @@ module.exports = {
                 reason: `${memberToJail.displayName} was jailed`,
                 type: ChannelType.PrivateThread,
             })
-        
-        await threadChannel.send(
-            `# You are here for a reason ${memberToJail}`
-        )
 
-        threadChannel.members.add(interaction.user)
+        // Ping the author of the thread
+        await (await threadChannel.send(`${interaction.user}`)).delete()
 
         await interaction.reply({
             content: `Jail thread created for ${memberToJail} : ${threadChannel}`,
         })
+        
+        await threadChannel.send(
+            `# You are here for a reason ${memberToJail}`
+        )
 
         if (!data.logChannelId) {
             return
