@@ -5,6 +5,7 @@ export default class JailData extends BaseData {
     jailChannelId: string
     jailRoleId: string
     roleToRemoveId: string
+    logChannelId: string
 
     constructor(guildId: string) {
         super(guildId, DataKey.jailSetup)

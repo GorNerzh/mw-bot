@@ -24,13 +24,19 @@ module.exports = {
         )
         .addChannelOption((option) =>
             option
-                .setName('channel')
+                .setName('jail-channel')
                 .setDescription('The jail channel.')
                 .setRequired(true)
+        )
+        .addChannelOption((option) =>
+            option
+                .setName('log-channel')
+                .setDescription('The channel to log jail actions.')
+                .setRequired(false)
         ),
     async execute(interaction: ChatInputCommandInteraction) {
 
-        const channel = interaction.options.getChannel('channel')
+        const channel = interaction.options.getChannel('jail-channel')
 
         if (!await Utils.mustBeTextChannelAsync(channel, interaction)) {
             return
@@ -40,10 +46,14 @@ module.exports = {
         data.jailChannelId = channel.id
         data.jailRoleId = interaction.options.getRole('jail-role').id
         data.roleToRemoveId = interaction.options.getRole('role-to-remove').id
+        const logChannel = interaction.options.getChannel('log-channel')
+        if (logChannel) {
+            data.logChannelId = logChannel.id
+        }
         await data.saveAsync()
 
         await interaction.reply({
-            content: 'Updated jail config.',
+            content: 'Jail config updated.',
         })
     },
 }

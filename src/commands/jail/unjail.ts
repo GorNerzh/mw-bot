@@ -66,7 +66,7 @@ module.exports = {
         await memberToJail.roles.add(roleToRemove)
 
         await interaction.reply({
-            content: `Unjailed user ${memberToJail}.`,
+            content: `${memberToJail} was unjailed.`,
         })
     },
 }

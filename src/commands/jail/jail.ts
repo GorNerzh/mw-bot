@@ -1,7 +1,10 @@
 import {
     ChannelType,
     ChatInputCommandInteraction,
+    EmbedBuilder,
     PermissionsBitField,
+    REST,
+    Routes,
     SlashCommandBuilder,
     TextChannel,
     ThreadAutoArchiveDuration,
@@ -25,13 +28,13 @@ module.exports = {
         if (!await Utils.isModCmdChannel(interaction)){
             return
         }
-        const setup = new JailData(interaction.guildId)
-        await setup.loadAsync()
+        const data = new JailData(interaction.guildId)
+        await data.loadAsync()
 
         if (
-            !setup.jailChannelId ||
-            !setup.jailRoleId ||
-            !setup.roleToRemoveId
+            !data.jailChannelId ||
+            !data.jailRoleId ||
+            !data.roleToRemoveId
         ) {
             await interaction.reply({
                 content: 'The jail command is not setup !',
@@ -39,9 +42,9 @@ module.exports = {
             return
         }
 
-        const jailRole = interaction.guild.roles.cache.find((r) => r.id === setup.jailRoleId)
-        const roleToRemove = interaction.guild.roles.cache.find((r) => r.id === setup.roleToRemoveId)
-        const jailChannel = interaction.guild.channels.cache.get(setup.jailChannelId) as TextChannel
+        const jailRole = interaction.guild.roles.cache.find((r) => r.id === data.jailRoleId)
+        const roleToRemove = interaction.guild.roles.cache.find((r) => r.id === data.roleToRemoveId)
+        const jailChannel = interaction.guild.channels.cache.get(data.jailChannelId) as TextChannel
 
         if (!jailRole) {
             await interaction.reply({
@@ -62,6 +65,7 @@ module.exports = {
         if (memberToJail.roles.cache.some((r) => r.id === jailRole.id)) {
             await interaction.reply({
                 content: `This member already has the ${jailRole} role`,
+                ephemeral: true
             })
             return
         }
@@ -79,11 +83,25 @@ module.exports = {
             })
         
         await threadChannel.send(
-            `# You are here for a reason ${memberToJail}\nAction taken by ${interaction.user}`
+            `# You are here for a reason ${memberToJail}`
         )
+
+        threadChannel.members.add(interaction.user)
 
         await interaction.reply({
             content: `Jail thread created for ${memberToJail} : ${threadChannel}`,
         })
+
+        if (!data.logChannelId) {
+            return
+        }
+
+        const logChannel = interaction.guild.channels.cache.get(data.logChannelId) as TextChannel
+
+        if (logChannel) {
+            const embed = new EmbedBuilder()
+            .setDescription(`Jail thread created by ${interaction.user} : ${threadChannel}`)
+            logChannel.send({embeds: [embed]})
+        }
     },
 }
