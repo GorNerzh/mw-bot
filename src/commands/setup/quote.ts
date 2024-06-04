@@ -27,7 +27,7 @@ module.exports = {
         await data.saveAsync()
 
         await interaction.reply({
-            content: 'Updated quote channel.',
+            content: 'Quote channel updated.',
         })
     },
 }

@@ -38,7 +38,7 @@ module.exports = {
         await data.saveAsync()
 
         await interaction.reply({
-            content: 'Updated mod command channel.',
+            content: 'Mod command channel updated.',
         })
     },
 }

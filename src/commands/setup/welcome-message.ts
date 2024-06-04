@@ -71,7 +71,7 @@ module.exports = {
         await data.saveAsync()
 
         await interaction.reply({
-            content: 'Updated welcome message.',
+            content: 'Welcome message updated.',
         })
     },
 }
