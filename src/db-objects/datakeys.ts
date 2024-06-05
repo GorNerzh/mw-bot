@@ -7,7 +7,8 @@ enum DataKey {
     challengeRoles = 'setup.challengeRoles',
     challengeLevels = 'setup.challengeLevels',
     categoryRoles = 'setup.categoryRoles',
-    botRole = 'setup.botRole'
+    botRole = 'setup.botRole',
+    analysis = 'analysis'
 }
 
 export default DataKey
