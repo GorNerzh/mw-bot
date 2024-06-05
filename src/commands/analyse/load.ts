@@ -45,6 +45,11 @@ module.exports = {
             return
         }
 
+        const replyMessage = await interaction.reply({
+            content: `Loading messages...`,
+            ephemeral: true
+        })
+
         const channelUtils = new ChannelUtils()
         const oldestMessage = await channelUtils.getMessageById(oldestMessageId, channelId, interaction.guild)
 
@@ -53,9 +58,8 @@ module.exports = {
 
         const messages = await fetchMessages(oldestMessage, latestMessage, channel)
 
-        await interaction.reply({
-            content: `Loaded **${messages.length}** messages.`,
-            ephemeral: true
+        replyMessage.edit({
+            content: `Loaded **${messages.length}** messages.`
         })
 
         const data = new AnalysisData(interaction.guildId)
