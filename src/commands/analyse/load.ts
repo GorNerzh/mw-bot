@@ -51,7 +51,7 @@ module.exports = {
         const latestMessage = latestMessageId ? await channelUtils.getMessageById(latestMessageId, channelId, interaction.guild)
             : (await channel.messages.fetch({ limit: 1 })).first()
 
-        const messages = await fetchMessages(oldestMessage.id, latestMessage.id, channel)
+        const messages = await fetchMessages(oldestMessage, latestMessage, channel)
 
         await interaction.reply({
             content: `Loaded **${messages.length}** messages.`,
@@ -69,33 +69,29 @@ module.exports = {
     },
 }
 
-async function fetchMessages(oldestMessageId: string, latestMessageId: string, channel: TextChannel): Promise<Message<true>[]> {
+async function fetchMessages(oldestMessage: Message<true>, latestMessage: Message<true>, channel: TextChannel): Promise<Message<true>[]> {
     if ((await channel.messages.fetch({ limit: 1 })).size == 0) {
         return new Array<Message<true>>()
     }
 
-    let lastId = null;
-    let foundFirstMessage = false;
+    let lastId = latestMessage.id;
     let messagesBetween = new Array<Message<true>>();
+    messagesBetween.push(latestMessage);
 
     while (true) {
         const options: FetchMessagesOptions = { limit: 100 };
-        if (lastId) options.before = lastId;
+        options.before = lastId;
 
         const messages = await channel.messages.fetch(options);
         lastId = messages.at(messages.size - 1)?.id;
 
         for (const message of messages.map(m => m)) {
-            if (foundFirstMessage && message.id > oldestMessageId) {
+            if (message.id > oldestMessage.id) {
                 messagesBetween.push(message);
             }
-            if (message.id === latestMessageId) {
+            if (message.id === oldestMessage.id) {
                 messagesBetween.push(message);
-                foundFirstMessage = true;
-            }
-            if (message.id === oldestMessageId) {
-                messagesBetween.push(message);
-                return messagesBetween;
+                break;
             }
         }
 
@@ -103,4 +99,6 @@ async function fetchMessages(oldestMessageId: string, latestMessageId: string, c
             break;
         }
     }
+
+    return messagesBetween
 }
