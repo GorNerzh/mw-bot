@@ -6,6 +6,7 @@ import {
 } from 'discord.js'
 import WelcomeData from '../../db-objects/data/welcome-data'
 import Utils from '../../utils/utils'
+import ChannelUtils from '../../utils/channel-utils'
 
 module.exports = {
     commandName: 'welcome-message',
@@ -47,17 +48,13 @@ module.exports = {
             return
         }
 
-        let message: Message<true>
+        const channelUtils = new ChannelUtils()
 
-        try {
-            if (messageSampleChannel) {
-                const channelID = messageSampleChannel.id
-                const channel = interaction.guild.channels.cache.get(channelID) as TextChannel
-                message = await channel.messages.fetch(messageId)
-            } else {
-                message = await interaction.channel.messages.fetch(messageId)
-            }
-        } catch (error) {
+        const message = await channelUtils.getMessageById(messageId,
+            messageSampleChannel?.id ?? interaction.channel.id,
+            interaction.guild)
+
+        if (!message) {
             await interaction.reply({
                 content: 'Cannot find the greeting message.',
                 ephemeral: true,
