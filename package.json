@@ -9,7 +9,8 @@
         "build": "tsc --project tsconfig.json",
         "start": "npm run build && node --enable-source-maps --trace-warnings dist/index.js",
         "deploy": "npm run build && node --enable-source-maps --trace-warnings dist/startup/deploy-commands.js",
-        "deploy:global": "npm run build && node --enable-source-maps --trace-warnings dist/startup/deploy-commands.js global"
+        "deploy:global": "npm run build && node --enable-source-maps --trace-warnings dist/startup/deploy-commands.js global",
+        "merge": "git switch main && git merge develop && git push --all && git switch develop"
     },
     "author": "Gor",
     "license": "ISC",

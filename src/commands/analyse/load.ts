@@ -51,9 +51,9 @@ module.exports = {
         })
 
         const channelUtils = new ChannelUtils()
-        const oldestMessage = await channelUtils.getMessageById(oldestMessageId, channelId, interaction.guild)
+        const oldestMessage = await channelUtils.fetchMessageById(oldestMessageId, channelId, interaction.guild)
 
-        const latestMessage = latestMessageId ? await channelUtils.getMessageById(latestMessageId, channelId, interaction.guild)
+        const latestMessage = latestMessageId ? await channelUtils.fetchMessageById(latestMessageId, channelId, interaction.guild)
             : (await channel.messages.fetch({ limit: 1 })).first()
 
         const messages = await fetchMessages(oldestMessage, latestMessage, channel)

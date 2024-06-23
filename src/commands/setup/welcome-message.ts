@@ -1,8 +1,6 @@
 import {
     SlashCommandSubcommandBuilder,
     ChatInputCommandInteraction,
-    Message,
-    TextChannel,
 } from 'discord.js'
 import WelcomeData from '../../db-objects/data/welcome-data'
 import Utils from '../../utils/utils'
@@ -16,55 +14,83 @@ module.exports = {
         .addChannelOption((option) =>
             option
                 .setName('welcome-channel')
-                .setDescription('The channel to send the greetings message.')
+                .setDescription('The channel to send the greetings message to.')
                 .setRequired(true)
         )
         .addStringOption((option) =>
             option
-                .setName('reference-message-id')
+                .setName('content-message-link')
                 .setDescription(
-                    'The message containing the greetings text.'
+                    'The link to the message with the greetings content.'
                 )
-                .setRequired(true)
         )
-        .addChannelOption((option) =>
+        .addStringOption((option) =>
             option
-                .setName('reference-message-channel')
+                .setName('embed-title')
                 .setDescription(
-                    'The channel where the reference message is located.'
+                    'The embed title.'
                 )
-                .setRequired(false)
+        )
+        .addStringOption((option) =>
+            option
+                .setName('embed-content-message-link')
+                .setDescription(
+                    'The link to the message with the embed content.'
+                )
+        )
+        .addStringOption((option) =>
+            option
+                .setName('attachment-link')
+                .setDescription(
+                    'The attachment file link.'
+                )
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
         const welcomeChannel = interaction.options.getChannel('welcome-channel')
-        const messageId = interaction.options.getString('reference-message-id')
-        const messageSampleChannel = interaction.options.getChannel(
-            'reference-message-channel'
-        )
+        const messageLink = interaction.options.getString('content-message-link')
+        const embedTitle = interaction.options.getString('embed-title')
+        const embedLink = interaction.options.getString('embed-content-message-link')
+        const attachmentLink = interaction.options.getString('attachment-link')
 
-        if (!Utils.mustBeTextChannelAsync(welcomeChannel, interaction)
-        || (messageSampleChannel && !Utils.mustBeTextChannelAsync(messageSampleChannel, interaction))) {
+        if ((messageLink && !await Utils.mustBeDiscordMessageLinkAsync(messageLink, interaction))
+            || (embedLink && !await Utils.mustBeDiscordMessageLinkAsync(embedLink, interaction))) {
             return
         }
 
         const channelUtils = new ChannelUtils()
 
-        const message = await channelUtils.getMessageById(messageId,
-            messageSampleChannel?.id ?? interaction.channel.id,
-            interaction.guild)
+        let messageContent: string
+        let embedContent: string
 
-        if (!message) {
-            await interaction.reply({
-                content: 'Cannot find the greeting message.',
-                ephemeral: true,
-            })
-            return
+        if (messageLink) {
+            messageContent = (await channelUtils.fetchMessageByLink(messageLink, interaction.guild))?.content
+            if (!messageContent) {
+                await interaction.reply({
+                    content: 'Invalid URL. Please provide a correct greeting message link.',
+                    ephemeral: true,
+                })
+                return
+            }
+        }
+
+        if (embedLink) {
+            embedContent = (await channelUtils.fetchMessageByLink(embedLink, interaction.guild))?.content
+            if (!embedContent) {
+                await interaction.reply({
+                    content: 'Invalid URL. Please provide a correct embed message link.',
+                    ephemeral: true,
+                })
+                return
+            }
         }
 
         const data = new WelcomeData(interaction.guildId)
         data.welcomeChannel = welcomeChannel.id
-        data.message = message.content
+        data.message = messageContent
+        data.embedTitle = embedTitle
+        data.embedContent = embedContent
+        data.attachmentLink = attachmentLink
         await data.saveAsync()
 
         await interaction.reply({
